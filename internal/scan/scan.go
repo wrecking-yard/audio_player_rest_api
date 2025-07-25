@@ -1,40 +1,48 @@
 package scan
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
 
-type File struct {
+type AudioFile struct {
 	Path string
 	Size uint
+	Type string
 }
 
 type FSScanner struct {
 	RootPath       string
+	IndexFindings  bool
 	ExcludePattern string
 	IncludePattern string
 	AddMeta        bool
-	Result         []File
+	Result         []string
 }
 
-func (fss FSScanner) FSWalk() error {
-
-	return fmt.Errorf("error: something something")
-}
-
-func fswalk(rootPath string) ([]string, error) {
-	entries := []string{}
-	err := filepath.Walk(rootPath, func(path string, f os.FileInfo, err error) error {
-		if f.Mode().IsRegular() {
-			entries = append(entries, path)
-		}
-		return nil
-	})
-
+func (fss *FSScanner) FSWalk() error {
+	entries, err := fswalk(fss.RootPath)
 	if err != nil {
-		return []string{}, err
+		return err
+	}
+	fss.Result = entries
+	return nil
+}
+
+func fswalk(root string) ([]string, error) {
+	entries := []string{}
+
+	dirEntry, _ := os.ReadDir(root)
+
+	for _, e := range dirEntry {
+		if e.Type().IsRegular() {
+			entries = append(entries, filepath.Join(root, e.Name()))
+		}
+
+		if e.Type().IsDir() {
+			_entries, _ := fswalk(filepath.Join(root, e.Name()))
+			entries = append(entries, _entries...)
+		}
 	}
 
 	return entries, nil
