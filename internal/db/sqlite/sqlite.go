@@ -154,9 +154,9 @@ func NewDB(InitSQLFunc func() string, DBPath, SQLITE3Cmd string) DB {
 			album_uuid STRING,
 			path STRING,
 			uuid STRING PRIMARY KEY,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(artist_uuid) REFERENCES artists(uuid),
-			FOREIGN KEY(album_uuid) REFERENCES albums(uuid),
+			FOREIGN KEY(album_uuid) REFERENCES albums(uuid)
 		);`
 		return create_tables
 	}
