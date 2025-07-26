@@ -1,0 +1,4 @@
+6c6
+<     url: "./api.json",
+---
+>     url: "https://petstore.swagger.io/v2/swagger.json",
