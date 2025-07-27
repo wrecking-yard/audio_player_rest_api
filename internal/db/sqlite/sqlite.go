@@ -3,13 +3,13 @@ package sqlite
 import (
 	"bytes"
 	"fmt"
+	_uuid "github.com/google/uuid"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
 	"time"
-	_uuid "github.com/google/uuid"
 )
 
 func dbFileSuffix() string {
@@ -51,12 +51,7 @@ func (db *DB) Init() bool {
 	return db.Success()
 }
 
-func TemplateUpserts(values []map[string]string, table, conflictOn string) (string, error) {
-	ConflictOn := conflictOn
-	if conflictOn == "" {
-		ConflictOn = "family, _group, test, variant, key"
-	}
-
+func TemplateUpserts(values []map[string]string, table string) (string, error) {
 	cols := make([][]string, len(values))
 	vals := make([][]string, len(values))
 	for i, vs := range values {
@@ -74,8 +69,7 @@ func TemplateUpserts(values []map[string]string, table, conflictOn string) (stri
 
 	t, err := template.New("t").Parse(
 		`{{range $i1, $v := .Cols}}
-		INSERT INTO {{$.Table}}({{index $._Cols $i1}}) VALUES({{index $._Vals $i1}})
-		ON CONFLICT({{$.ConflictOn}}) DO UPDATE SET ({{index $._Cols $i1}}, updated_at) = ({{index $._Vals $i1}}, CURRENT_TIMESTAMP);
+		INSERT INTO {{$.Table}}({{index $._Cols $i1}}) VALUES({{index $._Vals $i1}});
 		{{end}}
 		`,
 	)
@@ -84,11 +78,10 @@ func TemplateUpserts(values []map[string]string, table, conflictOn string) (stri
 	}
 	buffer := &bytes.Buffer{}
 	input := map[string]any{
-		"Table":      table,
-		"ConflictOn": ConflictOn,
-		"Cols":       cols,
-		"_Cols":      _cols,
-		"_Vals":      _vals,
+		"Table": table,
+		"Cols":  cols,
+		"_Cols": _cols,
+		"_Vals": _vals,
 	}
 	err = t.Execute(buffer, input)
 	if err != nil {
@@ -98,7 +91,7 @@ func TemplateUpserts(values []map[string]string, table, conflictOn string) (stri
 }
 
 func (db DB) TransactUpserts(values []map[string]string, table, conflictOn string) (string, error) {
-	upserts, err := TemplateUpserts(values, table, conflictOn)
+	upserts, err := TemplateUpserts(values, table)
 	if err != nil {
 		return "", err
 	}
@@ -142,11 +135,11 @@ func NewDB(InitSQLFunc func() string, DBPath, SQLITE3Cmd string) DB {
 		);
 		CREATE TABLE albums(
 			title STRING,
-			artist uuid,
-			album STRING,
+			artist_uuid uuid,
 			path STRING,
 			uuid STRING PRIMARY KEY,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(artist_uuid) REFERENCES artists(uuid)
 		);
 		CREATE TABLE songs(
 			title STRING,
@@ -173,7 +166,7 @@ func NewDB(InitSQLFunc func() string, DBPath, SQLITE3Cmd string) DB {
 	}
 }
 
-func uuid() (string, error) {
+func uuid4() (string, error) {
 	uuid, err := _uuid.NewRandom()
 	return uuid.String(), err
 }
