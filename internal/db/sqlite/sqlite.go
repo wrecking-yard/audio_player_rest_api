@@ -90,7 +90,7 @@ func TemplateUpserts(values []map[string]string, table string) (string, error) {
 	return buffer.String(), nil
 }
 
-func (db DB) TransactUpserts(values []map[string]string, table, conflictOn string) (string, error) {
+func (db DB) TransactUpserts(values []map[string]string, table string) (string, error) {
 	upserts, err := TemplateUpserts(values, table)
 	if err != nil {
 		return "", err
@@ -166,7 +166,7 @@ func NewDB(InitSQLFunc func() string, DBPath, SQLITE3Cmd string) DB {
 	}
 }
 
-func uuid4() (string, error) {
-	uuid, err := _uuid.NewRandom()
-	return uuid.String(), err
+func UUID4() string {
+	uuid, _ := _uuid.NewRandom()
+	return uuid.String()
 }
