@@ -13,14 +13,9 @@ func NewServerCmd() *cobra.Command {
 			Serve(cmd)
 		},
 	}
-
-	cmd.Flags().String("db-path", "data/index.sqlite3", "optional; filesystem path to SQLite DB")
-
 	return cmd
 }
 
 func Serve(cmd *cobra.Command) {
-	dbPath, _ := cmd.Flags().GetString("db-path")
-	db_ro = sqlite.NewDB(nil, dbPath, "")
 	server.Serve()
 }
