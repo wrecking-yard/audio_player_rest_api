@@ -22,23 +22,29 @@
             "format": "url",
             "type": "string"
           },
+          "count": {
+            "example": 93,
+            "type": "number"
+          },
           "id": {
             "format": "uuid",
             "type": "string"
           },
           "nameOrTitle": {
+            "example": "Kasane Teto",
             "maxLength": 128,
             "minLength": 3,
             "type": "string"
           },
-          "typw": {
+          "type": {
             "description": "An artist, an album or a song",
             "enum": [
               "artist",
               "album",
-              "song"
+              "song",
+              "count"
             ],
-            "example": "Kasane Teto",
+            "example": "artist",
             "type": "string"
           }
         },
@@ -107,6 +113,62 @@
         ]
       }
     },
+    "/album/{id}/songs": {
+      "get": {
+        "description": "Get songs by album ID.",
+        "operationId": "songsGetbyAlbumID",
+        "parameters": [
+          {
+            "description": "album `id`",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "return result count instead of results",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectArray"
+                }
+              }
+            },
+            "description": "OK; found albums (maybe)"
+          },
+          "404": {
+            "description": "Nothing found"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "Get songs by album ID.",
+        "tags": [
+          "album"
+        ]
+      }
+    },
     "/artist/{id}": {
       "get": {
         "description": "Get an artist info by ID.",
@@ -154,6 +216,118 @@
         ]
       }
     },
+    "/artist/{id}/albums": {
+      "get": {
+        "description": "Get an album info by artist ID.",
+        "operationId": "albumGetbyArtistID",
+        "parameters": [
+          {
+            "description": "artist `id`",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "return result count instead of results",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectArray"
+                }
+              }
+            },
+            "description": "OK; found albums (maybe)"
+          },
+          "404": {
+            "description": "Nothing found"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "Get albums by artist ID.",
+        "tags": [
+          "artist"
+        ]
+      }
+    },
+    "/artist/{id}/songs": {
+      "get": {
+        "description": "Get songs by artist ID.",
+        "operationId": "songsGetbyArtistID",
+        "parameters": [
+          {
+            "description": "artist `id`",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "return result count instead of results",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectArray"
+                }
+              }
+            },
+            "description": "OK; found albums (maybe)"
+          },
+          "404": {
+            "description": "Nothing found"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "Get songs by artist ID.",
+        "tags": [
+          "artist"
+        ]
+      }
+    },
     "/play/pause": {
       "post": {
         "description": "Pause whatever is being played currently.",
@@ -186,7 +360,7 @@
     },
     "/play/{id}": {
       "post": {
-        "description": "Play queue, artist's album(s) or song.",
+        "description": "Play artist's album(s) or song.",
         "operationId": "play",
         "parameters": [
           {
@@ -357,13 +531,13 @@
         ]
       }
     },
-    "/search/{for}": {
+    "/search/{for}/in/albums": {
       "get": {
-        "description": "Search for an artists, albums or songs.",
-        "operationId": "searchFor",
+        "description": "Search for albums.",
+        "operationId": "searchForAlbums",
         "parameters": [
           {
-            "description": "beginning of deletion range (greedy)",
+            "description": "text to search for in albums.",
             "in": "path",
             "name": "for",
             "required": true,
@@ -371,6 +545,15 @@
               "maxLength": 12,
               "minLength": 3,
               "type": "string"
+            }
+          },
+          {
+            "description": "return result count instead of results",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -399,7 +582,121 @@
             "description": "Unexpected error"
           }
         },
-        "summary": "Search for an artists, albums or songs.",
+        "summary": "Search for albums.",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/{for}/in/artists": {
+      "get": {
+        "description": "Search for artists.",
+        "operationId": "searchForArtists",
+        "parameters": [
+          {
+            "description": "text to search for in artists.",
+            "in": "path",
+            "name": "for",
+            "required": true,
+            "schema": {
+              "maxLength": 12,
+              "minLength": 3,
+              "type": "string"
+            }
+          },
+          {
+            "description": "return result count instead of results",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectArray"
+                }
+              }
+            },
+            "description": "OK; found some results"
+          },
+          "404": {
+            "description": "Nothing found"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "Search for artists.",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/{for}/in/songs": {
+      "get": {
+        "description": "Search for songs.",
+        "operationId": "searchForSongs",
+        "parameters": [
+          {
+            "description": "text to search for in songs.",
+            "in": "path",
+            "name": "for",
+            "required": true,
+            "schema": {
+              "maxLength": 12,
+              "minLength": 3,
+              "type": "string"
+            }
+          },
+          {
+            "description": "return result count instead of results",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectArray"
+                }
+              }
+            },
+            "description": "OK; found some results"
+          },
+          "404": {
+            "description": "Nothing found"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unexpected error"
+          }
+        },
+        "summary": "Search for songs.",
         "tags": [
           "search"
         ]
@@ -453,6 +750,11 @@
       }
     }
   },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
   "tags": [
     {
       "description": "Play songs, queue, pause music",

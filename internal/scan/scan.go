@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
+	"strings"
 
 	"codeberg.org/filipmnowak/audio_player_rest_api/internal/db/sqlite"
 	"codeberg.org/filipmnowak/audio_player_rest_api/internal/helpers"
@@ -107,7 +108,7 @@ func indexFindings(afs []AudioFile, db sqlite.DB) error {
 	for _, a := range artists {
 		input = append(input, map[string]string{"name": a, "uuid": sqlite.UUID4()})
 	}
-	out, err := db.TransactUpserts(input, "artists")
+	_, _ = db.TransactUpserts(input, "artists")
 
 	// compile list of all albums
 	albums := []Album{}
@@ -127,7 +128,7 @@ func indexFindings(afs []AudioFile, db sqlite.DB) error {
 		}
 		input = append(input, map[string]string{"title": a.Title, "artist_uuid": artist_uuid, "uuid": sqlite.UUID4(), "path": a.Path})
 	}
-	out, err = db.TransactUpserts(input, "albums")
+	_, _ = db.TransactUpserts(input, "albums")
 
 	// index songs
 	input = []map[string]string{}
@@ -139,15 +140,15 @@ func indexFindings(afs []AudioFile, db sqlite.DB) error {
 		if err != nil {
 			return err
 		}
-		input = append(input, map[string]string{"title": af.Title, "artist_uuid": artist_uuid, "album_uuid": album_uuid, "uuid": sqlite.UUID4(), "path": af.Path})
+		input = append(input, map[string]string{"title": af.Title, "artist_uuid": strings.Trim(artist_uuid, "\r\n"), "album_uuid": strings.Trim(album_uuid, "\r\n"), "uuid": sqlite.UUID4(), "path": af.Path})
 	}
 	if len(afs) > 30 {
 		splitInput, _ := helpers.SplitDBInput(input, 8)
 		for _, chunk := range splitInput {
-			out, _ = db.TransactUpserts(chunk, "songs")
+			_, _ = db.TransactUpserts(chunk, "songs")
 		}
 	} else {
-		out, _ = db.TransactUpserts(input, "songs")
+		_, _ = db.TransactUpserts(input, "songs")
 	}
 
 	return nil

@@ -1,8 +1,8 @@
 package server
 
 import (
+	"codeberg.org/filipmnowak/audio_player_rest_api/internal/api"
 	"embed"
-	"fmt"
 	"net/http"
 )
 
@@ -16,8 +16,14 @@ func Serve() {
 	mux := http.NewServeMux()
 	mux.Handle("/swagger-ui/", fs)
 
-	err := http.ListenAndServe(":8080", mux)
-	if err != nil {
-		fmt.Printf(err.Error())
+	// https://github.com/oapi-codegen/oapi-codegen/blob/116a63daf90260d279c1083e99f6718f4a5731e8/examples/minimal-server/stdhttp/main.go
+	apiServer := api.NewServer()
+	h := api.HandlerFromMuxWithBaseURL(apiServer, mux, "/api")
+
+	s := &http.Server{
+		Handler: h,
+		Addr:    "0.0.0.0:8080",
 	}
+
+	s.ListenAndServe()
 }

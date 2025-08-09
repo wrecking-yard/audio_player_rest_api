@@ -1,322 +1,6 @@
-openapi: 3.0.4
-info:
-  title: music player interface - OpenAPI 3.0
-  description: |-
-    music player interface.
-  version: v0.5a
-tags:
-  - name: play
-    description: Play songs, queue, pause music
-  - name: queue
-    description: Play queue
-  - name: search
-    description: Find artist, album, song
-  - name: artist
-    description: Artist info
-  - name: album
-    description: Album info
-  - name: song
-    description: Song info
-paths:
-
-  /play/{id}:
-    post:
-      tags:
-        - play
-      summary: Play queue, artist's album(s) or song.
-      description: Play queue, artist's album(s) or song.
-      operationId: play
-      parameters:
-        - name: id
-          in: path
-          description: ID of an artist, album or a song
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK; playing
-        '404':
-          description: Resource identified by `id` not found
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-                
-  /play/pause:
-    post:
-      tags:
-        - play
-      summary: Pause whatever is being played currently.
-      description: Pause whatever is being played currently.
-      operationId: playPause
-      responses:
-        '200':
-          description: OK; paused or already paused
-
-  /play/unpause:
-    post:
-      tags:
-        - play
-      summary: Unpause.
-      description: Unpause.
-      operationId: playUnpause
-      responses:
-        '200':
-          description: OK; unpaused or already playing
-
-
-  /queue/{id}:
-    post:
-      tags:
-        - queue
-      summary: Enqueue artist's album(s) or song.
-      description: Enqueue artist's album(s) or song.
-      operationId: enqueue
-      parameters:
-        - name: id
-          in: path
-          description: ID of an artist, album or a song
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK; queued
-        '404':
-          description: Resource identified by `id` not found
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-                
-  /queue/move/{index_from}/{index_to}:
-    post:
-      tags:
-        - queue
-      summary: Reorder queue.
-      description: Move enqueued album or song by absolute or relative index.
-      operationId: queueReorder
-      parameters:
-        - name: index_from
-          in: path
-          description: new queue index of an album or a song
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: index_to
-          in: path
-          description: new queue index of an album or a song
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: OK; queued
-        '404':
-          description: Resource identified by `id` not found
-        default:
-          description: Unexpected error
-
-  /queue/delete/{range_start}/{range_end}:
-    delete:
-      tags:
-        - queue
-      summary: Delete album or song(s) from the queue.
-      description: Delete album or song(s) from the queue.
-      operationId: queueDeleteFromByRange
-      parameters:
-        - name: range_start
-          in: path
-          description: beginning of deletion range (greedy)
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: range_end
-          in: path
-          description: end of deletion range (greedy)
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: OK; queued
-        '404':
-          description: Resource identified by `id` not found
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-                
-  /search/{for}:
-    get:
-      tags:
-        - search
-      summary: Search for an artists, albums or songs.
-      description: Search for an artists, albums or songs.
-      operationId: searchFor
-      parameters:
-        - name: for
-          in: path
-          description: beginning of deletion range (greedy)
-          required: true
-          schema:
-            type: string
-            minLength: 3
-            maxLength: 12
-      responses:
-        '200':
-          description: OK; found some results
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ObjectArray'
-        '404':
-          description: Nothing found
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  
-  /artist/{id}:
-    get:
-      tags:
-        - artist
-      summary: Get an artist info by ID.
-      description: Get an artist info by ID.  
-      operationId: artistGetbyID
-      parameters:
-        - name: id
-          in: path
-          description: artist `id`
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK; found such artist
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Object'
-        '404':
-          description: Nothing found
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  
-  /album/{id}:
-    get:
-      tags:
-        - album
-      summary: Get an album info by ID.
-      description: Get an album info by ID.  
-      operationId: albumGetbyID
-      parameters:
-        - name: id
-          in: path
-          description: album `id`
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK; found such album
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Object'
-        '404':
-          description: Nothing found
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-                
-  /song/{id}:
-    get:
-      tags:
-        - song
-      summary: Get a song info by ID.
-      description: Get a song info by ID.  
-      operationId: songGetbyID
-      parameters:
-        - name: id
-          in: path
-          description: song `id`
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK; found such song
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Object'
-        '404':
-          description: Nothing found
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  
 components:
   schemas:
-    Object:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        nameOrTitle:
-          type: string
-          minLength: 3
-          maxLength: 128
-        artURL:
-          type: string
-          format: url
-        typw:
-          type: string
-          description: An artist, an album or a song
-          example: Kasane Teto
-          enum:
-            - artist
-            - album
-            - song
-
-    ObjectArray:
-      description: List of artists, albums or songs
-      type: array
-      items:
-        $ref: '#/components/schemas/Object'
-
     Error:
-      type: object
       properties:
         code:
           type: string
@@ -325,4 +9,499 @@ components:
       required:
         - code
         - message
-
+      type: object
+    Object:
+      properties:
+        artURL:
+          format: url
+          type: string
+        count:
+          example: 93
+          type: number
+        id:
+          format: uuid
+          type: string
+        nameOrTitle:
+          example: Kasane Teto
+          maxLength: 128
+          minLength: 3
+          type: string
+        type:
+          description: An artist, an album or a song
+          enum:
+            - artist
+            - album
+            - song
+            - count
+          example: artist
+          type: string
+      type: object
+    ObjectArray:
+      description: List of artists, albums or songs
+      items:
+        $ref: '#/components/schemas/Object'
+      type: array
+info:
+  description: music player interface.
+  title: music player interface - OpenAPI 3.0
+  version: v0.5a
+openapi: 3.0.4
+paths:
+  /album/{id}:
+    get:
+      description: Get an album info by ID.
+      operationId: albumGetbyID
+      parameters:
+        - description: album `id`
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+          description: OK; found such album
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get an album info by ID.
+      tags:
+        - album
+  /album/{id}/songs:
+    get:
+      description: Get songs by album ID.
+      operationId: songsGetbyAlbumID
+      parameters:
+        - description: album `id`
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: return result count instead of results
+          in: query
+          name: count
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectArray'
+          description: OK; found albums (maybe)
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get songs by album ID.
+      tags:
+        - album
+  /artist/{id}:
+    get:
+      description: Get an artist info by ID.
+      operationId: artistGetbyID
+      parameters:
+        - description: artist `id`
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+          description: OK; found such artist
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get an artist info by ID.
+      tags:
+        - artist
+  /artist/{id}/albums:
+    get:
+      description: Get an album info by artist ID.
+      operationId: albumGetbyArtistID
+      parameters:
+        - description: artist `id`
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: return result count instead of results
+          in: query
+          name: count
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectArray'
+          description: OK; found albums (maybe)
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get albums by artist ID.
+      tags:
+        - artist
+  /artist/{id}/songs:
+    get:
+      description: Get songs by artist ID.
+      operationId: songsGetbyArtistID
+      parameters:
+        - description: artist `id`
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: return result count instead of results
+          in: query
+          name: count
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectArray'
+          description: OK; found albums (maybe)
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get songs by artist ID.
+      tags:
+        - artist
+  /play/{id}:
+    post:
+      description: Play artist's album(s) or song.
+      operationId: play
+      parameters:
+        - description: ID of an artist, album or a song
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          description: OK; playing
+        "404":
+          description: Resource identified by `id` not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Play queue, artist's album(s) or song.
+      tags:
+        - play
+  /play/pause:
+    post:
+      description: Pause whatever is being played currently.
+      operationId: playPause
+      responses:
+        "200":
+          description: OK; paused or already paused
+      summary: Pause whatever is being played currently.
+      tags:
+        - play
+  /play/unpause:
+    post:
+      description: Unpause.
+      operationId: playUnpause
+      responses:
+        "200":
+          description: OK; unpaused or already playing
+      summary: Unpause.
+      tags:
+        - play
+  /queue/{id}:
+    post:
+      description: Enqueue artist's album(s) or song.
+      operationId: enqueue
+      parameters:
+        - description: ID of an artist, album or a song
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          description: OK; queued
+        "404":
+          description: Resource identified by `id` not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Enqueue artist's album(s) or song.
+      tags:
+        - queue
+  /queue/delete/{range_start}/{range_end}:
+    delete:
+      description: Delete album or song(s) from the queue.
+      operationId: queueDeleteFromByRange
+      parameters:
+        - description: beginning of deletion range (greedy)
+          in: path
+          name: range_start
+          required: true
+          schema:
+            format: int64
+            type: integer
+        - description: end of deletion range (greedy)
+          in: path
+          name: range_end
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          description: OK; queued
+        "404":
+          description: Resource identified by `id` not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete album or song(s) from the queue.
+      tags:
+        - queue
+  /queue/move/{index_from}/{index_to}:
+    post:
+      description: Move enqueued album or song by absolute or relative index.
+      operationId: queueReorder
+      parameters:
+        - description: new queue index of an album or a song
+          in: path
+          name: index_from
+          required: true
+          schema:
+            format: int64
+            type: integer
+        - description: new queue index of an album or a song
+          in: path
+          name: index_to
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          description: OK; queued
+        "404":
+          description: Resource identified by `id` not found
+        default:
+          description: Unexpected error
+      summary: Reorder queue.
+      tags:
+        - queue
+  /search/{for}/in/albums:
+    get:
+      description: Search for albums.
+      operationId: searchForAlbums
+      parameters:
+        - description: text to search for in albums.
+          in: path
+          name: for
+          required: true
+          schema:
+            maxLength: 12
+            minLength: 3
+            type: string
+        - description: return result count instead of results
+          in: query
+          name: count
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectArray'
+          description: OK; found some results
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Search for albums.
+      tags:
+        - search
+  /search/{for}/in/artists:
+    get:
+      description: Search for artists.
+      operationId: searchForArtists
+      parameters:
+        - description: text to search for in artists.
+          in: path
+          name: for
+          required: true
+          schema:
+            maxLength: 12
+            minLength: 3
+            type: string
+        - description: return result count instead of results
+          in: query
+          name: count
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectArray'
+          description: OK; found some results
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Search for artists.
+      tags:
+        - search
+  /search/{for}/in/songs:
+    get:
+      description: Search for songs.
+      operationId: searchForSongs
+      parameters:
+        - description: text to search for in songs.
+          in: path
+          name: for
+          required: true
+          schema:
+            maxLength: 12
+            minLength: 3
+            type: string
+        - description: return result count instead of results
+          in: query
+          name: count
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectArray'
+          description: OK; found some results
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Search for songs.
+      tags:
+        - search
+  /song/{id}:
+    get:
+      description: Get a song info by ID.
+      operationId: songGetbyID
+      parameters:
+        - description: song `id`
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+          description: OK; found such song
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get a song info by ID.
+      tags:
+        - song
+servers:
+  - url: /api
+tags:
+  - description: Play songs, queue, pause music
+    name: play
+  - description: Play queue
+    name: queue
+  - description: Find artist, album, song
+    name: search
+  - description: Artist info
+    name: artist
+  - description: Album info
+    name: album
+  - description: Song info
+    name: song
