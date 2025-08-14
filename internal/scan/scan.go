@@ -22,10 +22,12 @@ var (
 )
 
 type Artist struct {
+	Id   string `json:"uuid"`
 	Name string
 }
 
 type Album struct {
+	Id     string `json:"uuid"`
 	Path   string
 	Title  string
 	Artist Artist
@@ -46,6 +48,7 @@ func (album Album) OneOf(albums []Album) bool {
 }
 
 type AudioFile struct {
+	Id     string `json:"uuid"`
 	Path   string
 	Title  string
 	Artist Artist

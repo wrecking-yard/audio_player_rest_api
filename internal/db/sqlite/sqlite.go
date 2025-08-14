@@ -2,7 +2,6 @@ package sqlite
 
 import (
 	"bytes"
-	"fmt"
 	_uuid "github.com/google/uuid"
 	"os"
 	"os/exec"
@@ -118,7 +117,6 @@ func (db DB) RunStatement(statement string, rw, unsafe, noJSONOutput bool) (stri
 		sqlite3CmdArgs = append(sqlite3CmdArgs, "--json")
 	}
 	cmd := exec.Command(db.SQLITE3Cmd, sqlite3CmdArgs...)
-	fmt.Printf("%s\n", statement)
 	output, err := cmd.CombinedOutput()
 	return string(output[:]), err
 }
