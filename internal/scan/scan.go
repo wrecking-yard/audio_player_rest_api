@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
-	"strings"
 
 	"codeberg.org/filipmnowak/audio_player_rest_api/internal/db/sqlite"
 	"codeberg.org/filipmnowak/audio_player_rest_api/internal/helpers"
@@ -27,11 +26,11 @@ type Artist struct {
 }
 
 type Album struct {
-	Id     string `json:"uuid"`
-	Path   string
-	Title  string
-	Artist Artist
-	Cover  []byte
+	Id        string `json:"uuid"`
+	Path      string `json:"path"`
+	Title     string `json:"title"`
+	Artist    Artist `json:",omitempty"`
+	CoverPath string `json:"cover_path,omitempty"`
 }
 
 func (albumA Album) SameAs(albumB Album) bool {
@@ -53,7 +52,6 @@ type AudioFile struct {
 	Title  string
 	Artist Artist
 	Album  Album
-	Cover  []byte
 	Size   uint
 	Type   string
 }
@@ -143,7 +141,7 @@ func indexFindings(afs []AudioFile, db sqlite.DB) error {
 		if err != nil {
 			return err
 		}
-		input = append(input, map[string]string{"title": af.Title, "artist_uuid": strings.Trim(artist_uuid, "\r\n"), "album_uuid": strings.Trim(album_uuid, "\r\n"), "uuid": sqlite.UUID4(), "path": af.Path})
+		input = append(input, map[string]string{"title": af.Title, "artist_uuid": artist_uuid, "album_uuid": album_uuid, "uuid": sqlite.UUID4(), "path": af.Path})
 	}
 	if len(afs) > 30 {
 		splitInput, _ := helpers.SplitDBInput(input, 8)
@@ -182,7 +180,7 @@ func getMetaFromPath(af AudioFile) (AudioFile, error) {
 	// expected path structure:
 	// <root dir>/<artist>/<album>/<song>
 	// expected song structure:
-	// <optional index><optional index sepratator: " - "><song title>.<file type suffix>.
+	// <optional index><optional index sepratator: " - "><song title>.<file type suffix>
 	// example:
 	// Music/ZUNTATA/Groove Coaster (Original Soundtrack)/40 - Got more raves？.flac
 

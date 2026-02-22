@@ -21,6 +21,9 @@ const (
 	Song   ObjectType = "song"
 )
 
+// BinaryImage Binary image
+type BinaryImage = interface{}
+
 // Error defines model for Error.
 type Error struct {
 	Code    string `json:"code"`
@@ -85,6 +88,9 @@ type ServerInterface interface {
 	// Get an album info by ID.
 	// (GET /album/{id})
 	AlbumGetbyID(w http.ResponseWriter, r *http.Request, id openapi_types.UUID)
+	// Get songs by album ID.
+	// (GET /album/{id}/cover)
+	CoverGetbyAlbumID(w http.ResponseWriter, r *http.Request, id openapi_types.UUID)
 	// Get songs by album ID.
 	// (GET /album/{id}/songs)
 	SongsGetbyAlbumID(w http.ResponseWriter, r *http.Request, id openapi_types.UUID, params SongsGetbyAlbumIDParams)
@@ -154,6 +160,31 @@ func (siw *ServerInterfaceWrapper) AlbumGetbyID(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.AlbumGetbyID(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CoverGetbyAlbumID operation middleware
+func (siw *ServerInterfaceWrapper) CoverGetbyAlbumID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CoverGetbyAlbumID(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -696,6 +727,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("GET "+options.BaseURL+"/album/{id}", wrapper.AlbumGetbyID)
+	m.HandleFunc("GET "+options.BaseURL+"/album/{id}/cover", wrapper.CoverGetbyAlbumID)
 	m.HandleFunc("GET "+options.BaseURL+"/album/{id}/songs", wrapper.SongsGetbyAlbumID)
 	m.HandleFunc("GET "+options.BaseURL+"/artist/{id}", wrapper.ArtistGetbyID)
 	m.HandleFunc("GET "+options.BaseURL+"/artist/{id}/albums", wrapper.AlbumGetbyArtistID)

@@ -2,7 +2,7 @@ package sqlite
 
 import (
 	"bytes"
-	_uuid "github.com/google/uuid"
+	google_uuid "github.com/google/uuid"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -133,21 +133,21 @@ func NewDB(InitSQLFunc func() string, DBPath, SQLITE3Cmd string) DB {
 		);
 		CREATE TABLE albums(
 			title STRING,
-			artist_uuid uuid,
+			artistgoogle_uuid uuid,
 			path STRING,
 			uuid STRING PRIMARY KEY,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY(artist_uuid) REFERENCES artists(uuid)
+			FOREIGN KEY(artistgoogle_uuid) REFERENCES artists(uuid)
 		);
 		CREATE TABLE songs(
 			title STRING,
-			artist_uuid STRING,
-			album_uuid STRING,
+			artistgoogle_uuid STRING,
+			albumgoogle_uuid STRING,
 			path STRING,
 			uuid STRING PRIMARY KEY,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY(artist_uuid) REFERENCES artists(uuid),
-			FOREIGN KEY(album_uuid) REFERENCES albums(uuid)
+			FOREIGN KEY(artistgoogle_uuid) REFERENCES artists(uuid),
+			FOREIGN KEY(albumgoogle_uuid) REFERENCES albums(uuid)
 		);`
 		return create_tables
 	}
@@ -165,6 +165,6 @@ func NewDB(InitSQLFunc func() string, DBPath, SQLITE3Cmd string) DB {
 }
 
 func UUID4() string {
-	uuid, _ := _uuid.NewRandom()
-	return uuid.String()
+	uuid, _ := google_uuid.NewRandom()
+	return strings.TrimRight(uuid.String(), "\r\n")
 }

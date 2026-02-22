@@ -10,36 +10,102 @@ components:
         - code
         - message
       type: object
-    Object:
+    Artist:
       properties:
+        songsURL:
+          format: url
+          type: string
+        albumsURL:
+          format: url
+          type: string
         artURL:
           format: url
           type: string
-        count:
-          example: 93
-          type: number
         id:
           format: uuid
           type: string
-        nameOrTitle:
-          example: Kasane Teto
+        name:
           maxLength: 128
           minLength: 3
           type: string
         type:
-          description: An artist, an album or a song
+          description: Artist type indicator
           enum:
             - artist
-            - album
-            - song
-            - count
           example: artist
           type: string
       type: object
-    ObjectArray:
-      description: List of artists, albums or songs
+    Album:
+      properties:
+        songsURL:
+          format: url
+          type: string
+        artistURL:
+          format: url
+          type: string
+        artURL:
+          format: url
+          type: string
+        id:
+          format: uuid
+          type: string
+        title:
+          maxLength: 128
+          minLength: 3
+          type: string
+        type:
+          description: Album type indicator
+          enum:
+            - album
+          example: album
+          type: string
+      type: object
+    Song:
+      properties:
+        albumURL:
+          format: url
+          type: string
+        artistURL:
+          format: url
+          type: string
+        artURL:
+          format: url
+          type: string
+        id:
+          format: uuid
+          type: string
+        title:
+          maxLength: 128
+          minLength: 3
+          type: string
+        type:
+          description: Song type indicator
+          enum:
+            - song
+          example: song
+          type: string
+      type: object
+    BinaryImage:
+      description: "Binary image"
+      content:
+        image/*:
+          schema:
+            type: string
+            format: binary
+    ArtistArray:
+      description: List of artists
       items:
-        $ref: '#/components/schemas/Object'
+        $ref: '#/components/schemas/Artist'
+      type: array
+    AlbumArray:
+      description: List of albums
+      items:
+        $ref: '#/components/schemas/Album'
+      type: array
+    SongArray:
+      description: List of songs
+      items:
+        $ref: '#/components/schemas/Song'
       type: array
 info:
   description: music player interface.
@@ -64,7 +130,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Object'
+                $ref: '#/components/schemas/Album'
           description: OK; found such album
         "404":
           description: Nothing found
@@ -100,7 +166,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectArray'
+                $ref: '#/components/schemas/SongArray'
           description: OK; found albums (maybe)
         "404":
           description: Nothing found
@@ -111,6 +177,36 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
       summary: Get songs by album ID.
+      tags:
+        - album
+  /album/{id}/cover:
+    get:
+      description: Get album cover by album ID.
+      operationId: coverGetbyAlbumID
+      parameters:
+        - description: album `id`
+          in: path
+          name: id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          content:
+            image/*:
+              schema:
+                $ref: '#/components/schemas/BinaryImage'
+          description: OK; found album cover (maybe)
+        "404":
+          description: Nothing found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Get album cover by album ID.
       tags:
         - album
   /artist/{id}:
@@ -130,7 +226,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Object'
+                $ref: '#/components/schemas/Artist'
           description: OK; found such artist
         "404":
           description: Nothing found
@@ -166,7 +262,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectArray'
+                $ref: '#/components/schemas/AlbumArray'
           description: OK; found albums (maybe)
         "404":
           description: Nothing found
@@ -202,7 +298,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectArray'
+                $ref: '#/components/schemas/SongArray'
           description: OK; found albums (maybe)
         "404":
           description: Nothing found
@@ -373,7 +469,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectArray'
+                $ref: '#/components/schemas/AlbumArray'
           description: OK; found some results
         "404":
           description: Nothing found
@@ -410,7 +506,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectArray'
+                $ref: '#/components/schemas/ArtistArray'
           description: OK; found some results
         "404":
           description: Nothing found
@@ -447,7 +543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectArray'
+                $ref: '#/components/schemas/SongArray'
           description: OK; found some results
         "404":
           description: Nothing found
@@ -477,7 +573,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Object'
+                $ref: '#/components/schemas/Song'
           description: OK; found such song
         "404":
           description: Nothing found
